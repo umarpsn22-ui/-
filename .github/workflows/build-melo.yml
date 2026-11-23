@@ -34,8 +34,8 @@ jobs:
             | base64 --decode > /tmp/MeloPlayer.tar.xz
           xz --test /tmp/MeloPlayer.tar.xz
           tar -xJf /tmp/MeloPlayer.tar.xz
-          sed -i 's/8\\.13/8.14.3/g' MeloPlayer/android/gradlew
-          sed -i 's/gradle-8\\.13-all.zip/gradle-8.14.3-all.zip/g' MeloPlayer/android/gradle/wrapper/gradle-wrapper.properties
+          sed -i 's/8[.]13/8.14.3/g' MeloPlayer/android/gradlew
+          sed -i 's/gradle-8[.]13-all.zip/gradle-8.14.3-all.zip/g' MeloPlayer/android/gradle/wrapper/gradle-wrapper.properties
 
       - name: Set up Java
         uses: actions/setup-java@v5
