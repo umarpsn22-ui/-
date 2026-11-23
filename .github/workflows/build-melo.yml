@@ -42,8 +42,8 @@ jobs:
           source = Path("MeloPlayer/lib/app_state.dart")
           code = source.read_text()
           patches = [
-              ("await picked.readAsByteStream().pipe(sink);", "await sink.addStream(picked.readAsByteStream());\\n          await sink.close();"),
-              ("await selected.readAsByteStream().pipe(sink);", "await sink.addStream(selected.readAsByteStream());\\n      await sink.close();"),
+              ("await picked.readAsByteStream().pipe(sink);", "await sink.addStream(picked.readAsByteStream());" + chr(10) + "          await sink.close();"),
+              ("await selected.readAsByteStream().pipe(sink);", "await sink.addStream(selected.readAsByteStream());" + chr(10) + "      await sink.close();"),
           ]
           for old, new in patches:
               if old not in code:
