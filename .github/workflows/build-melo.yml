@@ -1,0 +1,78 @@
+name: Build Melo Player APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build release APK
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Reassemble Flutter project
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat \
+            .melo-payload/part00 \
+            .melo-payload/part01 \
+            .melo-payload/part02 \
+            .melo-payload/part02b \
+            .melo-payload/part03 \
+            .melo-payload/part04 \
+            .melo-payload/part05 \
+            .melo-payload/part06 \
+            .melo-payload/part07 \
+            .melo-payload/part08 \
+            | base64 --decode > /tmp/MeloPlayer.tar.xz
+          xz --test /tmp/MeloPlayer.tar.xz
+          tar -xJf /tmp/MeloPlayer.tar.xz
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android platform
+        shell: bash
+        run: |
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager "platforms;android-36" "build-tools;36.0.0"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.9'
+          channel: stable
+          cache: true
+
+      - name: Resolve dependencies and analyze
+        working-directory: MeloPlayer
+        run: |
+          flutter --version
+          flutter pub get
+          flutter analyze
+        continue-on-error: true
+
+      - name: Build release APK
+        working-directory: MeloPlayer
+        run: flutter build apk --release
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: melo-player-release-apk
+          path: MeloPlayer/build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
+          retention-days: 14
