@@ -37,6 +37,20 @@ jobs:
           sed -i 's/8[.]13/8.14.3/g' MeloPlayer/android/gradlew
           sed -i 's/gradle-8[.]13-all.zip/gradle-8.14.3-all.zip/g' MeloPlayer/android/gradle/wrapper/gradle-wrapper.properties
           sed -i 's/version "2[.]2[.]0"/version "2.2.20"/' MeloPlayer/android/settings.gradle
+          python3 - <<'PY'
+          from pathlib import Path
+          source = Path("MeloPlayer/lib/app_state.dart")
+          code = source.read_text()
+          patches = [
+              ("await picked.readAsByteStream().pipe(sink);", "await sink.addStream(picked.readAsByteStream());\\n          await sink.close();"),
+              ("await selected.readAsByteStream().pipe(sink);", "await sink.addStream(selected.readAsByteStream());\\n      await sink.close();"),
+          ]
+          for old, new in patches:
+              if old not in code:
+                  raise SystemExit(f"Expected code pattern not found: {old}")
+              code = code.replace(old, new, 1)
+          source.write_text(code)
+          PY
 
       - name: Set up Java
         uses: actions/setup-java@v5
